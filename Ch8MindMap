@@ -1,0 +1,287 @@
+<style>
+  :root {
+    --green:#049f84; --orange:#ffa700; --red:#f32201;
+    --navy:#203d48; --blue:#00b2ff; --skyblue:#94e3ff;
+    --bdr:1px solid rgba(32,61,72,.12);
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  .lc-wrap {
+    font-family:'Avenir Next','Avenir','Century Gothic','Trebuchet MS',sans-serif;
+    color:var(--navy); max-width:860px; margin:0 auto; padding:1rem;
+  }
+  .page-header {
+    background:var(--navy); padding:1rem 1.2rem; border-radius:10px;
+    display:flex; align-items:center; gap:.75rem; margin-bottom:1rem;
+  }
+  .page-header h1 { color:#fff; font-size:1rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+  .unit-badge { background:var(--orange); color:var(--navy); font-size:.7rem; font-weight:800; padding:.25rem .6rem; border-radius:20px; text-transform:uppercase; letter-spacing:.05em; }
+  .tabs { display:flex; background:#fff; border-radius:10px; border:var(--bdr); overflow:hidden; margin-bottom:1.2rem; }
+  .tab-btn { flex:1; padding:.75rem .5rem; border:none; background:none; font-family:inherit; font-size:.78rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.04em; cursor:pointer; border-bottom:3px solid transparent; transition:all .2s; white-space:nowrap; }
+  .tab-btn.active { color:var(--navy); border-bottom-color:var(--orange); background:#fffbf0; }
+  .tab-btn:hover:not(.active) { color:var(--navy); background:#f9f9f9; }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+  .mm-group { margin-bottom:1.4rem; }
+  .mm-group-title { background:var(--navy); color:#fff; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:.4rem .75rem; border-radius:6px; display:inline-block; margin-bottom:.5rem; }
+  .mm-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:.55rem; }
+  .mm-card { background:#fff; border:2px solid var(--bdr); border-radius:10px; padding:.65rem .8rem; cursor:pointer; transition:all .18s; position:relative; }
+  .mm-card:hover { border-color:var(--blue); background:#edf9ff; }
+  .mm-card.open { border-color:var(--green); background:#f0faf7; }
+  .mm-term { font-weight:700; font-size:.88rem; color:var(--navy); padding-right:1.4rem; }
+  .mm-def { display:none; font-size:.82rem; color:#444; line-height:1.45; margin-top:.45rem; border-top:1px solid rgba(32,61,72,.1); padding-top:.4rem; }
+  .mm-card.open .mm-def { display:block; }
+  .mm-toggle { position:absolute; top:.55rem; right:.7rem; font-size:1.1rem; font-weight:900; color:var(--green); line-height:1; }
+  .mm-hint { text-align:center; font-size:.75rem; color:#999; font-style:italic; margin-bottom:.9rem; }
+  .quiz-wrap { background:#fff; border-radius:12px; border:var(--bdr); padding:1.4rem; box-shadow:0 2px 8px rgba(0,0,0,.05); }
+  .quiz-progress { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; font-size:.8rem; font-weight:700; }
+  .qbar-bg { flex:1; height:6px; background:#e5e5e5; border-radius:3px; margin:0 .8rem; }
+  .qbar-fill { height:100%; background:var(--blue); border-radius:3px; transition:width .3s; }
+  .quiz-q { font-size:1rem; font-weight:700; margin-bottom:1.1rem; line-height:1.4; }
+  .quiz-opts { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-bottom:1rem; }
+  @media(max-width:500px){ .quiz-opts{ grid-template-columns:1fr; } }
+  .quiz-opt { padding:.7rem .9rem; border:2px solid rgba(32,61,72,.12); border-radius:10px; background:#f9f9f9; font-family:inherit; font-size:.85rem; font-weight:600; cursor:pointer; text-align:left; line-height:1.35; transition:all .15s; }
+  .quiz-opt:hover:not(:disabled) { background:var(--skyblue); border-color:var(--blue); }
+  .quiz-opt.correct { background:#d4f5ed; border-color:var(--green); color:var(--green); }
+  .quiz-opt.wrong { background:#fde8e4; border-color:var(--red); color:var(--red); }
+  .quiz-fb { min-height:1.4rem; font-size:.85rem; font-weight:700; text-align:center; margin-bottom:.8rem; }
+  .quiz-fb.correct { color:var(--green); }
+  .quiz-fb.wrong { color:var(--red); }
+  .quiz-next { display:none; width:100%; padding:.7rem; border:none; border-radius:10px; background:var(--navy); color:#fff; font-family:inherit; font-size:.9rem; font-weight:700; cursor:pointer; }
+  .quiz-next:hover { opacity:.85; }
+  .quiz-score { text-align:center; padding:2rem 1rem; }
+  .score-num { font-size:3.5rem; font-weight:900; color:var(--green); }
+  .score-msg { font-size:.95rem; color:#555; margin-top:.3rem; }
+  .quiz-restart { margin-top:1.2rem; padding:.65rem 1.8rem; border:none; border-radius:10px; background:var(--green); color:#fff; font-family:inherit; font-size:.9rem; font-weight:700; cursor:pointer; }
+  .trends-intro { font-size:.85rem; color:#555; line-height:1.5; margin-bottom:1rem; background:#fff; border-radius:10px; padding:1rem 1.2rem; border:var(--bdr); }
+  .trend-card { background:#fff; border-radius:10px; border:var(--bdr); padding:1rem 1.2rem; margin-bottom:.7rem; box-shadow:0 2px 6px rgba(0,0,0,.04); display:flex; gap:.9rem; align-items:flex-start; }
+  .trend-dot { width:12px; height:12px; border-radius:50%; background:var(--orange); flex-shrink:0; margin-top:.25rem; }
+  .trend-text { font-size:.88rem; line-height:1.5; }
+  .trend-text strong { color:var(--navy); }
+</style>
+
+<div class="lc-wrap">
+
+<div class="page-header">
+  <span class="unit-badge">Unit 3</span>
+  <h1>Chapter 8 — Management Activities</h1>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab(0,this)">🗺 Mind Map</button>
+  <button class="tab-btn" onclick="switchTab(1,this)">🧠 Quiz</button>
+  <button class="tab-btn" onclick="switchTab(2,this)">📈 2026 Trends</button>
+</div>
+
+<div class="tab-panel active" id="panel-0">
+  <p class="mm-hint">Tap any keyword to reveal its definition</p>
+
+  <div class="mm-group">
+    <div class="mm-group-title">📋 Planning</div>
+    <div class="mm-grid">
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Planning</div>
+        <div class="mm-def">The setting down of specific goals and objectives and the putting in place of strategies that allow you to achieve the stated goals and objectives of the business.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Mission Statement</div>
+        <div class="mm-def">Visionary statement containing the business' values and overall purpose. All other plans are built from it.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Strategic Planning</div>
+        <div class="mm-def">Made by senior management. Long-term goals (5–10 years) flowing from the Mission Statement.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Tactical Planning</div>
+        <div class="mm-def">Made by middle management. Short-term goals (1–2 years) flowing from the Strategic Plan.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Operational Planning</div>
+        <div class="mm-def">Day-to-day planning: staff rosters, daily/weekly/monthly tasks. Keeps the business running smoothly.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Contingency Planning</div>
+        <div class="mm-def">Back-up plan for an unexpected emergency or unforeseen event to avoid disruptions to the business.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Benefits of Planning</div>
+        <div class="mm-def">Future Focus (be proactive); Reduces Uncertainty; Attract Investors (show expected profits); Assess Performance (compare objectives to actual results).</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">SWOT Analysis</div>
+        <div class="mm-def">Strengths and Weaknesses are internal. Opportunities and Threats are external. Used as a planning tool to assess the business before setting objectives.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mm-group">
+    <div class="mm-group-title">🏗 Organising</div>
+    <div class="mm-grid">
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Organising</div>
+        <div class="mm-def">Arranging the resources of a business into an organised structure in order to achieve the business' objectives.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Span of Control</div>
+        <div class="mm-def">The number of subordinates that report to one manager/superior. Can be wide or narrow depending on skill of workers, nature of work and commitment of staff.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Chain of Command</div>
+        <div class="mm-def">The hierarchy in a business from top management down to employees. Sets out the lines of communication from top to bottom (between layers).</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Functional Structure</div>
+        <div class="mm-def">Business divided into clear departments (e.g. Finance, Marketing, HR). Benefits: specialisation, clear hierarchy, promotional path. Challenges: isolation, coordination issues, communication problems.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Matrix Structure</div>
+        <div class="mm-def">Project/team-based structure crossing departments. Benefits: coordination, improved decisions, social (Maslow). Challenges: slower decisions, unclear chain of command, conflict.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Product Structure</div>
+        <div class="mm-def">Business split by product lines. Benefits: competition between divisions, focussed resources, flexibility. Challenges: duplication, lack of cohesion, cannibalism.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Geographical Structure</div>
+        <div class="mm-def">Business split by location/region. Benefits: flexible to local trends, better logistics, local competition. Challenges: duplication, conflict, lack of cohesion.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mm-group">
+    <div class="mm-group-title">🎯 Controlling</div>
+    <div class="mm-grid">
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Controlling</div>
+        <div class="mm-def">Measuring any deviations away from a business' plans and taking action to correct them.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Financial Control</div>
+        <div class="mm-def">Ensure profitability and liquidity. Use cash flow forecasts, reduce costs (cheaper suppliers), have cash available to pay short-term debts.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Stock Control</div>
+        <div class="mm-def">Achieve optimal stock levels. Overstocking: stock loses value, higher storage costs. Understocking: miss out on sales, lose consumer loyalty. Use regular stock takes and JIT management.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Quality Control</div>
+        <div class="mm-def">Physical inspections (sampling); Quality Circles (staff teams); Quality Marks (ISO, Q Mark, Bord Bia). Benefit: improves consumer satisfaction and loyalty.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+      <div class="mm-card" onclick="toggleCard(this)">
+        <div class="mm-term">Credit Control</div>
+        <div class="mm-def">Minimise bad debts. Incentivise cash payments. Check creditworthiness of customers. Set credit limits. Good admin: organise invoices and follow up calls.</div>
+        <span class="mm-toggle">+</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-panel" id="panel-1">
+  <div class="quiz-wrap" id="quiz-wrap"></div>
+</div>
+
+<div class="tab-panel" id="panel-2">
+  <div class="trends-intro">
+    Based on past paper analysis, these are the most likely exam topics for <strong>Chapter 8: Management Activities</strong> in the <strong>2026 LC Business</strong> exam.
+  </div>
+  <div class="trend-card">
+    <div class="trend-dot"></div>
+    <div class="trend-text">
+<strong>ABQ: Types of Planning</strong> — Know all five types (Mission Statement, Strategic, Tactical, Operational, Contingency). In the ABQ the text gives you clues: a "5-year plan" links to Strategic; "day-to-day" links to Operational. Write the stage name, explain it, then quote directly from the text.</div>
+  </div>
+  <div class="trend-card">
+    <div class="trend-dot"></div>
+    <div class="trend-text">
+<strong>ABQ: Matrix v Functional Structure</strong> — Know the benefits and challenges of both. The ABQ often describes how a business organises staff into teams (Matrix) or clear departments (Functional). Be ready to evaluate which structure suits the business in the text.</div>
+  </div>
+  <div class="trend-card">
+    <div class="trend-dot"></div>
+    <div class="trend-text">
+<strong>ABQ: Evaluate Management Activities</strong> — Planning, Organising and Controlling can be asked together as one evaluation question (30 marks). Know what each activity involves, link to the ABQ text, and give a judgement — especially for Controlling where more marks are available for evaluation.</div>
+  </div>
+  <div class="trend-card">
+    <div class="trend-dot"></div>
+    <div class="trend-text">
+<strong>Stock, Quality and Credit Control</strong> — These areas of Controlling appear regularly in both ABQ and long questions. Know the difference between overstocking and understocking, how quality circles work, and what credit control involves.</div>
+  </div>
+  <div class="trend-card">
+    <div class="trend-dot"></div>
+    <div class="trend-text">
+<strong>SQ: Chain of Command and Span of Control</strong> — Short definition questions on these two appear regularly. Know the definitions and the factors that affect span of control: skill of manager/workers, nature of work, commitment of staff.</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function switchTab(idx,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+idx).classList.add('active');
+  if(idx===1&&!quizBuilt)buildQuiz();
+}
+function toggleCard(el){
+  el.classList.toggle('open');
+  el.querySelector('.mm-toggle').textContent=el.classList.contains('open')?'−':'+';
+}
+const QUESTIONS=[
+  {q:"What is Planning?",opts:["Setting specific goals and objectives and putting in place strategies to achieve them","Arranging the resources of a business into an organised structure","Measuring deviations from plans and taking corrective action","A visionary statement containing the business' values"],a:0},
+  {q:"Which type of plan is made by senior management and covers 5–10 years?",opts:["Strategic Planning","Tactical Planning","Operational Planning","Contingency Planning"],a:0},
+  {q:"Tactical Planning is made by whom, and covers what timeframe?",opts:["Middle management; 1–2 years from the Strategic Plan","Senior management; 5–10 years from the Mission Statement","Front-line staff; day-to-day rosters and tasks","The board of directors; the full lifetime of the business"],a:0},
+  {q:"A Contingency Plan is best described as...",opts:["A back-up plan for unexpected emergencies to avoid disruptions","A long-term plan set by senior management","A day-to-day staff rota","A plan to attract new investors"],a:0},
+  {q:"In a SWOT analysis, which two factors are INTERNAL?",opts:["Strengths and Weaknesses","Opportunities and Threats","Strengths and Opportunities","Weaknesses and Threats"],a:0},
+  {q:"What is the Span of Control?",opts:["The number of subordinates that report directly to one manager","The hierarchy from top management down to employees","The number of departments in an organisation","The range of products a business sells"],a:0},
+  {q:"Which organisational structure is project/team-based and crosses departments?",opts:["Matrix Structure","Functional Structure","Product Structure","Geographical Structure"],a:0},
+  {q:"A benefit of a Functional Structure is...",opts:["Specialisation and a clear promotional path for staff","Better coordination across different projects","Flexibility to respond to local market trends","Competition between product divisions"],a:0},
+  {q:"What is Controlling in management?",opts:["Measuring deviations from business plans and taking corrective action","Setting long-term goals for the business","Arranging resources into an organised structure","Recruiting and training new employees"],a:0},
+  {q:"Overstocking means a business...",opts:["Has stock that may lose value or become obsolete, with higher storage costs","Misses out on sales and may lose consumer loyalty","Has insufficient cash to pay short-term debts","Has too many bad debts from customers"],a:0},
+  {q:"Which control method involves staff teams meeting regularly to solve quality problems?",opts:["Quality Circles","Physical Inspections","JIT Management","Credit Limits"],a:0},
+  {q:"Credit Control helps a business by...",opts:["Minimising bad debts through credit checks, limits and invoice follow-up","Ensuring stock levels are always at the optimum","Reducing the cost of raw materials from suppliers","Checking quality standards through physical sampling"],a:0}
+];
+let quizBuilt=false,qIdx=0,score=0,answered=false,shuffled=[];
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function buildQuiz(){
+  quizBuilt=true;
+  shuffled=shuffle(QUESTIONS).map(q=>{const c=q.opts[q.a];const opts=shuffle(q.opts);return{...q,opts,a:opts.indexOf(c)};});
+  qIdx=0;score=0;answered=false;renderQ();
+}
+function renderQ(){
+  const wrap=document.getElementById('quiz-wrap');
+  if(qIdx>=shuffled.length){renderScore();return;}
+  const q=shuffled[qIdx];
+  const pct=Math.round((qIdx/shuffled.length)*100);
+  wrap.innerHTML=`<div class="quiz-progress"><span>Q${qIdx+1}/${shuffled.length}</span><div class="qbar-bg"><div class="qbar-fill" style="width:${pct}%"></div></div><span>Score: ${score}</span></div><div class="quiz-q">${q.q}</div><div class="quiz-opts">${q.opts.map((o,i)=>`<button class="quiz-opt" onclick="answer(${i})">${o}</button>`).join('')}</div><div class="quiz-fb" id="quiz-fb"></div><button class="quiz-next" id="quiz-next" onclick="nextQ()">Next Question →</button>`;
+}
+function answer(chosen){
+  if(answered)return;answered=true;
+  const q=shuffled[qIdx];
+  const opts=document.querySelectorAll('.quiz-opt');
+  const fb=document.getElementById('quiz-fb');
+  opts.forEach(b=>b.disabled=true);
+  if(chosen===q.a){opts[chosen].classList.add('correct');fb.textContent='✓ Correct!';fb.className='quiz-fb correct';score++;}
+  else{opts[chosen].classList.add('wrong');opts[q.a].classList.add('correct');fb.textContent='✗ Not quite — the correct answer is highlighted.';fb.className='quiz-fb wrong';}
+  document.getElementById('quiz-next').style.display='block';
+}
+function nextQ(){qIdx++;answered=false;renderQ();}
+function renderScore(){
+  const pct=Math.round((score/shuffled.length)*100);
+  const m</script>
